@@ -1,0 +1,2722 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="color-scheme" content="light dark"/>
+    <meta name="supported-color-schemes" content="light dark"/>
+    <title>온라인 메모장</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        /* ---------- Design Tokens ---------- */
+        :root {
+            /* Light Theme */
+            --bg-primary: #FAFBFC;
+            --bg-secondary: #F8F9FA;
+            --surface-primary: #FFFFFF;
+            --surface-secondary: #F1F3F4;
+            --surface-elevated: #FFFFFF;
+            --surface-overlay: rgba(255, 255, 255, 0.95);
+
+            --text-primary: #1A1A1A;
+            --text-secondary: #6B7280;
+            --text-tertiary: #9CA3AF;
+            --text-accent: #4338CA;
+
+            --accent-primary: #6366F1;
+            --accent-secondary: #818CF8;
+            --accent-hover: #4F46E5;
+            --accent-pressed: #4338CA;
+
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+
+            --border-primary: rgba(0, 0, 0, 0.08);
+            --border-secondary: rgba(0, 0, 0, 0.05);
+            --border-focus: var(--accent-primary);
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 9999px;
+
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 24px;
+            --spacing-2xl: 32px;
+
+            --font-xs: 0.75rem;
+            --font-sm: 0.875rem;
+            --font-base: 1rem;
+            --font-lg: 1.125rem;
+            --font-xl: 1.25rem;
+            --font-2xl: 1.5rem;
+
+            --line-height-tight: 1.25;
+            --line-height-normal: 1.5;
+            --line-height-relaxed: 1.625;
+
+            --backdrop-blur: blur(20px);
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
+        /* Dark Theme */
+        body.dark-mode {
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #111111;
+            --surface-primary: #1A1A1A;
+            --surface-secondary: #2A2A2A;
+            --surface-elevated: #262626;
+            --surface-overlay: rgba(26, 26, 26, 0.95);
+
+            --text-primary: #FAFAFA;
+            --text-secondary: #A1A1AA;
+            --text-tertiary: #71717A;
+            --text-accent: #A78BFA;
+
+            --accent-primary: #8B5CF6;
+            --accent-secondary: #A78BFA;
+            --accent-hover: #7C3AED;
+            --accent-pressed: #6D28D9;
+
+            --success: #34D399;
+            --warning: #FBBF24;
+            --error: #F87171;
+
+            --border-primary: rgba(255, 255, 255, 0.1);
+            --border-secondary: rgba(255, 255, 255, 0.05);
+            --border-focus: var(--accent-primary);
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ---------- Base Reset ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: var(--font-base);
+            line-height: var(--line-height-normal);
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: color var(--transition-normal), background-color var(--transition-normal);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------- Custom Scrollbar ---------- */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-primary);
+            border-radius: var(--radius-full);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+            background-clip: padding-box;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* ---------- Utility Classes ---------- */
+        .hidden {
+            display: none !important;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ---------- Animations ---------- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ---------- Layout ---------- */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .topbar {
+            height: 64px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--spacing-lg);
+            background: var(--surface-overlay);
+            backdrop-filter: var(--backdrop-blur);
+            border-bottom: 1px solid var(--border-secondary);
+            z-index: 1000;
+        }
+
+        .topbar-left,
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .logo {
+            font-size: var(--font-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .logo::before {
+            content: '📝';
+            font-size: var(--font-xl);
+        }
+
+        /* 공유 결과 화면 스타일 */
+        .share-result-container {
+            text-align: center;
+            padding: var(--spacing-xl) var(--spacing-lg);
+            animation: fadeIn 0.3s ease;
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .share-success-icon {
+            font-size: 48px;
+            margin-bottom: var(--spacing-lg);
+            color: var(--success);
+        }
+
+        .share-result-title {
+            font-size: var(--font-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+        }
+
+        .share-code-container {
+            background: var(--surface-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .code-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .generated-code {
+            flex: 1;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: var(--font-xl);
+            font-weight: 700;
+            color: var(--accent-primary);
+            letter-spacing: 2px;
+            text-align: center;
+            user-select: all;
+        }
+
+        .share-code-info {
+            font-size: var(--font-sm);
+            color: var(--text-secondary);
+            margin-top: var(--spacing-md);
+        }
+
+        .app-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            overflow: hidden;
+        }
+
+        /* ---------- Sidebar ---------- */
+        .sidebar {
+            background: var(--surface-primary);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform var(--transition-normal);
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            padding-left: 40px;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            font-size: var(--font-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            font-size: var(--font-sm);
+        }
+
+        .sidebar-controls {
+            padding: var(--spacing-md) var(--spacing-lg);
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .memo-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-sm);
+        }
+
+        /* ---------- Folder List ---------- */
+        .folder-list {
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-secondary);
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .folder-item {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-xs);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-fast);
+        }
+
+        .folder-item:hover {
+            background: var(--surface-secondary);
+        }
+
+        .folder-item.active {
+            background: var(--accent-primary);
+            color: #ffffff;
+        }
+
+        .folder-delete {
+            font-size: var(--font-xs);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .folder-item:hover .folder-delete {
+            opacity: 1;
+        }
+
+        .memo-item {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-xs);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            border: 1px solid transparent;
+            user-select: none;
+        }
+
+        .memo-item:hover {
+            background: var(--surface-secondary);
+            border-color: var(--border-primary);
+        }
+
+        .memo-item.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .memo-item.active .memo-preview {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .memo-title {
+            font-weight: 500;
+            font-size: var(--font-sm);
+            line-height: var(--line-height-tight);
+            margin-bottom: var(--spacing-xs);
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .memo-preview {
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+            line-height: var(--line-height-normal);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .memo-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-sm);
+            font-size: var(--font-xs);
+            color: var(--text-tertiary);
+        }
+
+        .memo-item.active .memo-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .sidebar-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--border-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ---------- Content Area ---------- */
+        .content {
+            background: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .memo-detail {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: var(--spacing-2xl);
+            gap: var(--spacing-lg);
+            min-height: 0; /* allow flex item to shrink */
+            overflow-y: auto; /* enable scrolling when content is long */
+        }
+
+        .memo-title-input {
+            font-size: var(--font-2xl);
+            font-weight: 600;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .memo-title-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .memo-title-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .memo-editor-container {
+            flex: 1;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            background: var(--surface-primary);
+            overflow: auto;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .memo-metadata {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--surface-secondary);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-xs);
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: var(--text-tertiary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: var(--font-xl);
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+        }
+
+        .empty-state-description {
+            font-size: var(--font-sm);
+            line-height: var(--line-height-relaxed);
+            max-width: 400px;
+        }
+
+        /* ---------- Buttons ---------- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            font-size: var(--font-sm);
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--surface-secondary);
+            color: var(--text-secondary);
+            border-color: var(--border-primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            border-color: var(--border-primary);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover:not(:disabled) {
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-sm {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: var(--font-xs);
+        }
+
+        .btn-lg {
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: var(--font-base);
+        }
+
+        /* ---------- Modals ---------- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeIn var(--transition-normal) ease;
+        }
+
+        .modal-header {
+            padding: var(--spacing-xl);
+            border-bottom: 1px solid var(--border-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: var(--font-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: var(--spacing-xl);
+        }
+
+        .modal-footer {
+            padding: var(--spacing-xl);
+            border-top: 1px solid var(--border-secondary);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+        }
+
+        /* ---------- Form Elements ---------- */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-sm);
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            font-size: var(--font-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-primary);
+        }
+
+        /* ---------- Notifications ---------- */
+        .notification {
+            position: fixed;
+            top: var(--spacing-xl);
+            right: var(--spacing-xl);
+            background: var(--surface-primary);
+            color: var(--text-primary);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+            z-index: 10001;
+            opacity: 0;
+            transition: opacity var(--transition-slow);
+        }
+
+        /* 메모 옵션 버튼 스타일 */
+        .note-options-btn {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            color: var(--text-tertiary);
+            background: transparent;
+            border: none;
+            font-size: var(--font-lg);
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            opacity: 0.7;
+            transition: all var(--transition-fast);
+        }
+
+        .note-options-btn:hover {
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            opacity: 1;
+        }
+
+        /* 메모 옵션 메뉴 스타일 */
+        .note-options-menu {
+            position: absolute;
+            top: calc(var(--spacing-sm) + 28px);
+            right: var(--spacing-sm);
+            background: var(--surface-elevated);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            z-index: 10;
+            min-width: 120px;
+            border: 1px solid var(--border-primary);
+        }
+
+        .note-option-item {
+            padding: var(--spacing-md);
+            color: var(--text-primary);
+            font-size: var(--font-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .note-option-item:hover {
+            background: var(--surface-secondary);
+        }
+
+        #errorNotification {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            background: var(--error);
+            color: white;
+            padding: var(--spacing-md);
+            z-index: 10002;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .notification.success {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .notification.error {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+
+        /* ---------- Loading States ---------- */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-primary);
+            border-radius: 50%;
+            border-top-color: var(--accent-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        /* ---------- Responsive Design ---------- */
+        @media (max-width: 768px) {
+            .app-content {
+                grid-template-columns: 1fr;
+            }
+
+            .app-content.sidebar-collapsed {
+                grid-template-columns: 0 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 64px;
+                left: 0;
+                bottom: 0;
+                width: 300px;
+                z-index: 1000;
+                transform: translateX(-100%);
+                box-shadow: var(--shadow-xl);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .memo-detail {
+                padding: var(--spacing-lg);
+            }
+
+            .topbar {
+                padding: 0 var(--spacing-md);
+            }
+
+            .logo {
+                font-size: var(--font-base);
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: var(--spacing-lg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .topbar {
+                height: 56px;
+            }
+
+            .app-content {
+                height: calc(100vh - 56px);
+            }
+
+            .sidebar {
+                top: 56px;
+                width: 280px;
+            }
+
+            .memo-detail {
+                padding: var(--spacing-md);
+                gap: var(--spacing-md);
+            }
+
+            .memo-title-input {
+                font-size: var(--font-xl);
+            }
+        }
+
+        /* ---------- Toast UI Editor Customization ---------- */
+        .toastui-editor-defaultUI,
+        .toastui-editor-dark {
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .toastui-editor-defaultUI .te-toolbar,
+        .toastui-editor-dark .te-toolbar {
+            border-bottom: 1px solid var(--border-primary) !important;
+            background: var(--surface-secondary) !important;
+            padding: var(--spacing-sm) !important;
+            position: sticky !important;
+            top: 0;
+            z-index: 10;
+        }
+
+        .toastui-editor-defaultUI .te-toolbar button,
+        .toastui-editor-dark .te-toolbar button {
+            border-radius: var(--radius-sm) !important;
+            margin: 2px !important;
+            transition: all var(--transition-fast) !important;
+        }
+
+        .toastui-editor-defaultUI .te-toolbar button:hover,
+        .toastui-editor-dark .te-toolbar button:hover {
+            background: var(--surface-primary) !important;
+        }
+
+        .toastui-editor-defaultUI .te-md-container,
+        .toastui-editor-dark .te-md-container {
+            background: var(--surface-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .toastui-editor-defaultUI .te-preview,
+        .toastui-editor-dark .te-preview {
+            background: var(--surface-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Custom class to apply dark mode colors while using light mode settings */
+        .dark-mode-colors {
+            /* Apply dark mode colors from the toastui-editor-dark.css */
+            --toastui-editor-main-color: #4b96e6 !important;
+            --toastui-editor-text-color: #e5e5e5 !important;
+            --toastui-editor-bg-color: #121212 !important;
+            --toastui-editor-border-color: #333 !important;
+            --toastui-editor-toolbar-bg-color: #232323 !important;
+            --toastui-editor-toolbar-active-color: #555 !important;
+            --toastui-editor-scrollbar-thumb-color: #666 !important;
+            --toastui-editor-scrollbar-thumb-active-color: #999 !important;
+            --toastui-editor-highlight-color: #fff !important;
+            --toastui-editor-highlight-background-color: #134a8e !important;
+        }
+
+        /* Apply dark mode colors to specific editor elements */
+        .dark-mode-colors .toastui-editor-contents,
+        .dark-mode-colors .ProseMirror {
+            color: var(--text-primary) !important;
+            background-color: var(--surface-primary) !important;
+        }
+
+        .dark-mode-colors .toastui-editor-toolbar,
+        .dark-mode-colors .toastui-editor-defaultUI-toolbar {
+            background-color: var(--surface-secondary) !important;
+            border-bottom: 1px solid var(--border-primary) !important;
+        }
+
+        .dark-mode-colors .toastui-editor-popup,
+        .dark-mode-colors .toastui-editor-context-menu {
+            background-color: var(--surface-elevated) !important;
+            border: 1px solid var(--border-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* ---------- Sticky Markdown Toolbar ---------- */
+        .sticky-toolbar {
+            position: fixed;
+            top: 64px; /* height of the .topbar on desktop */
+            left: 320px; /* sidebar width */
+            right: 0;
+            z-index: 999; /* above content, below modal (10000) */
+            background: var(--surface-secondary);
+            border-bottom: 1px solid var(--border-primary);
+            padding: var(--spacing-sm);
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+
+        /* When sidebar is collapsed or on mobile, let the toolbar hug the left edge */
+        .sidebar.collapsed ~ .content + #editorToolbarSticky,
+        .app-content.sidebar-collapsed + #editorToolbarSticky
+
+        @media (max-width: 768px) {
+            .sticky-toolbar {
+                left: 0;
+                top: 56px; /* mobile topbar height */
+            }
+        }
+
+        /* Toolbar moved out of editor should fill the width */
+        .toolbar-moved {
+            width: 100%;
+        }
+
+        /* --- Ensure memo pane grows when sidebar is collapsed (all breakpoints) --- */
+        .app-content.sidebar-collapsed {
+            grid-template-columns: 0 1fr !important;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.css"/>
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<script>
+    (function () {
+        var storedTheme = localStorage.getItem('theme') || 'dark-mode';
+        document.body.classList.add(storedTheme);
+    })();
+</script>
+
+<div class="app-container">
+    <!-- Error Notification -->
+    <div id="errorNotification" class="notification error" style="display: none;"></div>
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <button id="toggleSidebar" class="btn btn-ghost btn-icon">
+                <span>☰</span>
+            </button>
+            <a href="#" class="logo">온라인 메모장</a>
+        </div>
+        <div class="topbar-right">
+            <button id="themeToggle" class="btn btn-ghost btn-icon" title="테마 변경">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <button id="saveBtn" class="btn btn-primary btn-sm" title="저장">
+                <span>💾</span>
+                <span>저장</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sticky toolbar container for the markdown editor -->
+    <div id="editorToolbarSticky" class="sticky-toolbar hidden"></div>
+
+    <!-- Main Content -->
+    <div class="app-content">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="search-container">
+                    <input id="codeInput" class="search-input" type="text" placeholder="새 메모 코드 입력..."
+                           autocomplete="off" maxlength="8"/>
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="sidebar-controls">
+                    <button id="addBtn" class="btn btn-primary btn-sm" title="메모 추가">
+                        <span>➕</span>
+                        <span>추가</span>
+                    </button>
+                    <button id="addFolderBtn" class="btn btn-secondary btn-sm" title="폴더 추가">
+                        <span>📁</span>
+                        <span>폴더</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="folderList" class="folder-list"></div>
+            <div class="memo-list" id="memoList">
+                <!-- Memo items will be populated here -->
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="settingsBtn" class="btn btn-ghost btn-sm" title="설정">
+                    <span>⚙️</span>
+                    <span>설정</span>
+                </button>
+                <button id="shareBtn" class="btn btn-ghost btn-sm" title="공유">
+                    <span>🔗</span>
+                    <span>공유</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <div id="memoDetail" class="memo-detail hidden">
+                <input id="memoTitle" class="memo-title-input" type="text" placeholder="메모 제목을 입력하세요..."
+                       autocomplete="off"/>
+                <div id="memoEditor" class="memo-editor-container"></div>
+                <div class="memo-metadata">
+                    <div id="memoDates">
+                        <span>생성: <span id="createDate">-</span></span>
+                        <span>수정: <span id="updateDate">-</span></span>
+                    </div>
+                    <div class="save-status">
+                        <span id="saveStatus" class="hidden">저장됨</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="noMemo" class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <div class="empty-state-title">메모가 없습니다</div>
+                <div class="empty-state-description">
+                    새로운 메모를 추가하여 시작하세요.<br>
+                    왼쪽 사이드바에서 메모 코드를 입력하고 추가 버튼을 클릭하세요.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">메모 공유</h3>
+            <button id="shareClose" class="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="shareStageSelect">
+                <div class="form-group">
+                    <div style="display: flex; gap: var(--spacing-sm); justify-content: center;">
+                        <button id="receiveBtn" class="btn btn-secondary">공유받기</button>
+                        <button id="createBtn" class="btn btn-primary">공유하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="shareStageReceive" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">공유 코드</label>
+                    <input id="shareCodeInput" class="form-input" type="text" placeholder="공유 코드를 입력하세요"
+                           autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"/>
+                </div>
+                <button id="shareCodeConfirmBtn" class="btn btn-primary">확인</button>
+            </div>
+
+            <div id="shareStageCreate" class="hidden">
+                <div class="form-group">
+                    <div style="display: flex; gap: var(--spacing-sm); justify-content: center;">
+                        <button id="modeLinkBtn" class="btn btn-secondary">링크</button>
+                        <button id="modeFileBtn" class="btn btn-secondary">파일</button>
+                    </div>
+                </div>
+
+                <div id="linkInputWrap" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">링크</label>
+                        <input id="linkInput" class="form-input" type="text" placeholder="공유할 링크를 입력하세요"
+                               autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"/>
+                    </div>
+                </div>
+
+                <div id="fileInputWrap" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">파일</label>
+                        <div style="border: 2px dashed var(--border-primary); border-radius: var(--radius-md); padding: var(--spacing-2xl); text-align: center; cursor: pointer;">
+                            <input id="fileInput" type="file" style="display: none;"/>
+                            <p id="fileDropText" style="color: var(--text-secondary);">파일을 드래그하거나 클릭하여 선택하세요</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">공유 가능 횟수</label>
+                    <input type="number" id="remainingInput" class="form-input" min="1" max="99" value="1"/>
+                </div>
+
+                <button id="shareSubmitBtn" class="btn btn-primary" disabled>공유하기</button>
+
+                <div id="shareResultWrap" class="hidden" style="margin-top: var(--spacing-xl); text-align: center;">
+                    <div id="shareResultText"
+                         style="white-space: pre-wrap; font-size: var(--font-sm); margin-bottom: var(--spacing-md);"></div>
+                    <div class="form-group">
+                        <label class="form-label">공유 코드</label>
+                        <div style="display: flex; gap: var(--spacing-sm);">
+                            <input id="shareResultCode" class="form-input" type="text" readonly/>
+                            <button id="copyCodeBtn" class="btn btn-secondary" title="코드 복사">복사</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">정보</label>
+                        <div style="font-size: var(--font-sm); text-align: left; background: var(--surface-secondary); border-radius: var(--radius-md); padding: var(--spacing-md);">
+                            <div>생성 일자: <span id="shareCreateDate">-</span></div>
+                            <div>만료 일자: <span id="shareExpireDate">-</span></div>
+                            <div>남은 조회수: <span id="shareRemainingCnt">-</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">설정</h3>
+            <button id="settingsClose" class="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <div class="form-checkbox">
+                    <input type="checkbox" id="autoSaveEnable"/>
+                    <label for="autoSaveEnable">자동 저장 활성화</label>
+                </div>
+                <input type="number" id="autoSaveIntervalInput" class="form-input" min="10" max="240" placeholder="60"
+                       style="margin-top: var(--spacing-sm);" disabled/>
+                <small style="color: var(--text-tertiary);">자동 저장 간격 (초)</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">테마</label>
+                <select id="themeSelect" class="form-select">
+                    <option value="light">라이트 모드</option>
+                    <option value="dark">다크 모드</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">클라이언트 연동</label>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="clientStatus" style="color: var(--text-secondary);">미연동</span>
+                    <button id="clientIntegrationBtn" class="btn btn-secondary btn-sm">연결</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="resetListBtn" class="btn btn-secondary">메모 목록 초기화</button>
+        </div>
+    </div>
+</div>
+
+<!-- Client Integration Modal -->
+<div id="clientIntegrationModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">클라이언트 연동</h3>
+            <button id="clientDialogClose" class="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="createClientBtn" class="btn btn-primary"
+                 style="margin: var(--spacing-sm); width: calc(100% - var(--spacing-lg));">새 클라이언트 생성
+            </div>
+            <div id="connectClientBtn" class="btn btn-secondary"
+                 style="margin: var(--spacing-sm); width: calc(100% - var(--spacing-lg));">기존 클라이언트 연결
+            </div>
+
+            <div id="clientConnectForm" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">클라이언트 코드</label>
+                    <input id="clientCodeInput" class="form-input" type="text" placeholder="클라이언트 코드를 입력하세요"/>
+                </div>
+                <button id="clientCodeConfirmBtn" class="btn btn-primary">확인</button>
+            </div>
+
+            <div id="clientConnectStatus" class="hidden"
+                 style="margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--surface-secondary); border-radius: var(--radius-md); color: var(--text-secondary);"></div>
+
+            <button id="clientConnectExecuteBtn" class="btn btn-primary hidden" style="margin-top: var(--spacing-md);">
+                연결 실행
+            </button>
+            <button id="clientDialogBackBtn" class="btn btn-secondary hidden" style="margin-top: var(--spacing-md);">
+                뒤로
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 초대 모달 -->
+<div id="inviteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">메모 초대</h3>
+            <button id="inviteClose" class="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">초대 코드</label>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                    <input id="inviteCodeDisplay" class="form-input" type="text" readonly/>
+                    <button id="copyInviteCodeBtn" class="btn btn-secondary" title="코드 복사">복사</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">초대 URL</label>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                    <input id="inviteUrlDisplay" class="form-input" type="text" readonly/>
+                    <button id="copyInviteUrlBtn" class="btn btn-secondary" title="URL 복사">복사</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">QR 코드</label>
+                <div id="qrCodeContainer" style="text-align: center; margin-top: var(--spacing-md);">
+                    <!-- QR 코드가 여기에 생성됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Move Folder Modal -->
+<div id="moveFolderModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">폴더에 넣기</h3>
+        </div>
+        <div class="modal-body">
+            <select id="moveFolderSelect" class="form-input" style="width:100%;"></select>
+        </div>
+        <div class="modal-footer">
+            <button id="moveFolderConfirm" class="btn btn-primary">확인</button>
+            <button id="moveFolderCancel" class="btn btn-secondary">취소</button>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div id="termsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="termsTitle" class="modal-title">이용약관</h3>
+        </div>
+        <div class="modal-body">
+            <div id="termsContent"
+                 style="max-height: 400px; overflow-y: auto; line-height: var(--line-height-relaxed);"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="termsConfirm" class="btn btn-primary">확인</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Persist selected memo across reloads
+    const activeCodeKey = 'activeMemoCode';
+    let activeCode = localStorage.getItem(activeCodeKey) || null;
+
+    var currentMenuCode = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 문서 클릭 시 열린 옵션 메뉴 닫기
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.note-options-btn') && !e.target.closest('.note-options-menu')) {
+                document.querySelectorAll('.note-options-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Thymeleaf로부터 전달된 에러 메시지 처리
+        const errorParam = '[[${errorMessage}]]';
+        if (errorParam && errorParam !== '[[${errorMessage}]]') {
+            const errorNotification = document.getElementById('errorNotification');
+            errorNotification.textContent = errorParam;
+            errorNotification.style.display = 'block';
+            setTimeout(() => {
+                errorNotification.style.opacity = '1';
+            }, 100);
+            setTimeout(() => {
+                errorNotification.style.opacity = '0';
+                setTimeout(() => {
+                    errorNotification.style.display = 'none';
+                }, 500);
+            }, 3000);
+        }
+
+        // 초대 모달 표시 함수
+        function showInviteModal(noteCode) {
+            const inviteModal = document.getElementById('inviteModal');
+            const inviteCodeDisplay = document.getElementById('inviteCodeDisplay');
+            const inviteUrlDisplay = document.getElementById('inviteUrlDisplay');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const inviteUrl = `${window.location.origin}/page/note/invite?code=${noteCode}`;
+
+            // QRCode 라이브러리가 로드되지 않았는지 확인
+            const isQRCodeLoaded = typeof QRCode !== 'undefined';
+            if (!isQRCodeLoaded) {
+                // QRCode 라이브러리 동적 로드 시도
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+                document.head.appendChild(script);
+
+                // 로딩 메시지 표시
+                qrCodeContainer.innerHTML = '<p style="color: var(--text-secondary);">QR 코드 로딩 중...</p>';
+            }
+
+            // 코드와 URL 표시
+            inviteCodeDisplay.value = noteCode;
+            inviteUrlDisplay.value = inviteUrl;
+
+            // QR 코드 생성
+            qrCodeContainer.innerHTML = '';
+            try {
+                new QRCode(qrCodeContainer, {
+                    text: inviteUrl,
+                    width: 128,
+                    height: 128,
+                    colorDark: document.body.classList.contains('dark-mode') ? '#FFFFFF' : '#000000',
+                    colorLight: document.body.classList.contains('dark-mode') ? '#1A1A1A' : '#FFFFFF',
+                });
+            } catch (error) {
+                console.error('QR 코드 생성 오류:', error);
+                qrCodeContainer.innerHTML = '<p style="color: var(--text-secondary);">QR 코드를 생성할 수 없습니다.</p>';
+            }
+
+            // 모달 표시
+            inviteModal.classList.add('show');
+
+            // 닫기 버튼 이벤트
+            document.getElementById('inviteClose').addEventListener('click', () => {
+                inviteModal.classList.remove('show');
+            });
+
+            // 모달 외부 클릭 시 닫기
+            inviteModal.addEventListener('click', (e) => {
+                if (e.target === inviteModal) {
+                    inviteModal.classList.remove('show');
+                }
+            });
+
+            // 코드 복사 버튼
+            document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
+                inviteCodeDisplay.select();
+                document.execCommand('copy');
+                showNotification('초대 코드가 복사되었습니다', 'success');
+            });
+
+            // URL 복사 버튼
+            document.getElementById('copyInviteUrlBtn').addEventListener('click', () => {
+                inviteUrlDisplay.select();
+                document.execCommand('copy');
+                showNotification('초대 URL이 복사되었습니다', 'success');
+            });
+        }
+
+        // 메모 삭제 함수
+        function deleteNote(noteCode) {
+            // 로컬스토리지에서 메모 코드 제거
+            noteCodeObjs = noteCodeObjs.filter(o => o.code !== noteCode);
+            localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+            codes = noteCodeObjs.map(o => o.code);
+
+            // 모든 폴더에서 해당 코드 제거
+            folders.forEach(f => {
+                f.codes = f.codes.filter(c => c !== noteCode);
+            });
+            saveFolders();
+
+            // connectClientCode가 있으면 서버에서도 삭제
+            const connectCode = localStorage.getItem('connectClientCode');
+            if (connectCode) {
+                fetch(`/connect/client/note/codes/${noteCode}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Connect-Code': connectCode
+                    }
+                }).catch(err => console.error('서버 삭제 실패:', err));
+            }
+
+            // 현재 활성화된 메모가 삭제된 메모인 경우 처리
+            if (activeCode === noteCode) {
+                if (codes.length > 0) {
+                    activeCode = codes[0];
+                    localStorage.setItem(activeCodeKey, activeCode);
+                } else {
+                    activeCode = null;
+                    localStorage.removeItem(activeCodeKey);
+                }
+            }
+
+            showNotification('메모가 삭제되었습니다', 'success');
+            fetchMemos(); // 메모 목록 새로고침
+        }
+
+        // Utility selectors
+        const $ = selector => document.querySelector(selector);
+        const $$ = selector => Array.from(document.querySelectorAll(selector));
+
+        // Safe date parser: handles numeric-string epoch and ISO strings
+        function toDate(obj) {
+            if (obj == null) return new Date(NaN);
+            if (typeof obj === 'string' && /^\d+$/.test(obj)) {
+                return new Date(Number(obj));
+            }
+            return new Date(obj);
+        }
+
+        // Move the Toast UI toolbar into the fixed container so it never scrolls away
+        function moveToolbar() {
+            const toolbar = memoEditorContainer.querySelector('.te-toolbar');
+            const sticky = document.getElementById('editorToolbarSticky');
+            if (toolbar && !sticky.contains(toolbar)) {
+                sticky.classList.remove('hidden');
+                sticky.appendChild(toolbar);
+                toolbar.classList.add('toolbar-moved');
+                toolbar.style.position = 'static';
+                toolbar.style.background = 'transparent';
+                toolbar.style.border = 'none';
+                toolbar.style.width = '100%';
+            }
+        }
+
+        // Keep the sticky toolbar correctly aligned when the sidebar toggles or the window resizes
+        function updateStickyLeft() {
+            const sticky = document.getElementById('editorToolbarSticky');
+            if (!sticky) return;
+
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            const sidebarElem = document.querySelector('.sidebar');
+            const collapsed = (sidebarElem && sidebarElem.classList.contains('collapsed')) || isMobile;
+
+            sticky.style.left = collapsed ? '0px' : '320px';
+        }
+
+        window.addEventListener('resize', updateStickyLeft);
+
+        // Initialize or reinitialize the ToastUI editor
+        function initEditor(content = '') {
+            // Use theme based on current mode
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            return new toastui.Editor({
+                el: $('#memoEditor'),
+                height: '100%',
+                width: '100%',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                toolbarItems: [
+                    ['heading', 'bold', 'italic', 'strike'],
+                    ['hr', 'quote'],
+                    ['ul', 'ol', 'task', 'table'],
+                    ['link', 'code', 'codeblock']
+                ],
+                hideModeSwitch: true,
+                initialValue: content,
+                // Use dark theme when in dark mode
+                theme: isDarkMode ? 'dark' : 'light'
+            });
+        }
+
+        const connectCodeKey = 'connectClientCode';
+        let connectClientResponseData = null;
+
+        function initConnectClient() {
+            const stored = localStorage.getItem(connectCodeKey);
+            if (stored) {
+                fetch('/connect/client', {headers: {'Connect-Code': stored}})
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data) {
+                            localStorage.removeItem(connectCodeKey);
+                            location.reload();
+                        } else {
+                            connectClientResponseData = data;
+                            const returnedCodes = data.noteCodes;
+                            const stored = JSON.parse(localStorage.getItem(noteCodesKey) || '[]');
+                            const merged = stored.map(o => o.code).filter(code => returnedCodes.includes(code));
+                            returnedCodes.forEach(code => {
+                                if (!merged.includes(code)) merged.push(code);
+                            });
+                            noteCodeObjs = merged.map(code => ({code}));
+                            localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+                            codes = noteCodeObjs.map(o => o.code);
+                        }
+                    })
+                    .catch(() => {
+                        localStorage.removeItem(connectCodeKey);
+                        location.reload();
+                    });
+            }
+        }
+
+        initConnectClient();
+
+        currentMenuCode = null;
+        const themeToggle = $('#themeToggle');
+        const themeIcon = $('#themeIcon');
+
+        const memoEditorContainer = $('#memoEditor');
+
+        function applyEditorThemeClass() {
+            const wrapper = memoEditorContainer.querySelector('.toastui-editor-defaultUI, .toastui-editor-dark');
+            if (!wrapper) return;
+
+            // Apply dark mode colors only when in dark mode
+            if (document.body.classList.contains('dark-mode')) {
+                // Add a custom class to handle dark mode colors
+                wrapper.classList.add('dark-mode-colors');
+            } else {
+                wrapper.classList.remove('dark-mode-colors');
+            }
+        }
+
+        function updateThemeIcon() {
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.textContent = '☀️';
+            } else {
+                themeIcon.textContent = '🌙';
+            }
+        }
+
+        updateThemeIcon();
+        let memoEditor = initEditor('');
+        moveToolbar();
+        updateStickyLeft();
+        // Fix Toast UI table context-menu placement so it appears at the mouse pointer
+        memoEditor.on('contextmenu', (e) => {
+            const pointerX = e.clientX;
+            const pointerY = e.clientY;
+            setTimeout(() => {
+                const menu = document.querySelector('.toastui-editor-context-menu, .toastui-editor-contextmenu');
+                if (!menu) return;
+
+                // Force fixed positioning relative to the viewport to avoid transforms
+                menu.style.position = 'fixed';
+
+                const rect = menu.getBoundingClientRect();
+                let left = pointerX;
+                let top = pointerY;
+
+                // Prevent overflow off the right / bottom edges
+                if (left + rect.width > window.innerWidth) {
+                    left = window.innerWidth - rect.width - 8;
+                }
+                if (top + rect.height > window.innerHeight) {
+                    top = window.innerHeight - rect.height - 8;
+                }
+
+                // Prevent overflow off the left / top edges
+                if (left < 8) left = 8;
+                if (top < 8) top = 8;
+
+                menu.style.left = `${left}px`;
+                menu.style.top = `${top}px`;
+            }, 0);
+        });
+
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (document.activeElement === memoTitle) {
+                    updateTitle();
+                } else {
+                    updateContent();
+                }
+            }
+        });
+
+        applyEditorThemeClass();
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            document.body.classList.toggle('light-mode');
+            const newTheme = document.body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+            const currentContent = memoEditor.getMarkdown();
+            memoEditor.destroy();
+            memoEditor = initEditor(currentContent);
+            moveToolbar();
+            updateStickyLeft();
+            // Fix Toast UI table context-menu placement so it appears at the mouse pointer
+            memoEditor.on('contextmenu', (e) => {
+                const pointerX = e.clientX;
+                const pointerY = e.clientY;
+                setTimeout(() => {
+                    const menu = document.querySelector('.toastui-editor-context-menu, .toastui-editor-contextmenu');
+                    if (!menu) return;
+
+                    // Force fixed positioning relative to the viewport to avoid transforms
+                    menu.style.position = 'fixed';
+
+                    const rect = menu.getBoundingClientRect();
+                    let left = pointerX;
+                    let top = pointerY;
+
+                    // Prevent overflow off the right / bottom edges
+                    if (left + rect.width > window.innerWidth) {
+                        left = window.innerWidth - rect.width - 8;
+                    }
+                    if (top + rect.height > window.innerHeight) {
+                        top = window.innerHeight - rect.height - 8;
+                    }
+
+                    // Prevent overflow off the left / top edges
+                    if (left < 8) left = 8;
+                    if (top < 8) top = 8;
+
+                    menu.style.left = `${left}px`;
+                    menu.style.top = `${top}px`;
+                }, 0);
+            });
+            applyEditorThemeClass();
+        });
+
+        const toggleSidebar = $('#toggleSidebar');
+        const sidebar = $('.sidebar');
+        toggleSidebar.addEventListener('click', () => {
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+            if (isMobile) {
+                // 모바일: 기존 슬라이드 방식
+                sidebar.classList.toggle('open');
+            } else {
+                // 데스크톱: 접힘/펼침
+                sidebar.classList.toggle('collapsed');
+                document.querySelector('.app-content')
+                    .classList.toggle('sidebar-collapsed');
+            }
+            updateStickyLeft();
+        });
+
+        const saveBtn = $('#saveBtn');
+        saveBtn.addEventListener('click', () => {
+            updateTitle();
+            updateContent();
+        });
+
+        const contentArea = $('.content');
+        contentArea.addEventListener('click', () => {
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        let draggedCode = null;
+        const clientIdKey = 'clientId';
+        const noteCodesKey = 'noteCodes';
+        const noteCodeObjsKey = noteCodesKey;
+        const foldersKey = 'folders';
+        let folders = JSON.parse(localStorage.getItem(foldersKey) || '[]');
+        const activeFolderKey = 'activeFolderId';
+        let activeFolderId = localStorage.getItem(activeFolderKey) || null;
+        let noteCodeObjs = JSON.parse(localStorage.getItem(noteCodesKey) || '[]')
+            .map(o => (typeof o === 'string') ? {code: o} : ({code: o.code}));
+
+        let clientId = localStorage.getItem(clientIdKey);
+
+        function showNotification(msg, type = 'success') {
+            let notif = document.querySelector('.notification');
+            if (!notif) {
+                notif = document.createElement('div');
+                notif.className = 'notification';
+                document.body.appendChild(notif);
+            }
+            notif.textContent = msg;
+            notif.className = `notification ${type} show`;
+
+            // If a hide timer is already running, reset it
+            if (notif._hideTimeout) {
+                clearTimeout(notif._hideTimeout);
+            }
+
+            // Start a new 1‑second timer before fade‑out
+            notif._hideTimeout = setTimeout(() => {
+                notif.classList.remove('show');
+            }, 1000); // wait 1 s, then CSS takes care of fade‑out
+        }
+
+        const isInitial = !clientId;
+        if (isInitial) {
+            clientId = crypto.randomUUID();
+            localStorage.setItem(clientIdKey, clientId);
+            fetch('/notification/terms-of-used')
+                .then(res => res.json())
+                .then(data => showTerms(data));
+        } else {
+            fetch('/notification')
+                .then(res => res.json())
+                .then(data => {
+                    const storedNumber = localStorage.getItem('notificationNumber');
+                    if (storedNumber !== String(data.number)) {
+                        showTerms(data);
+                    }
+                });
+        }
+
+        function showTerms(data) {
+            const termsModal = document.getElementById('termsModal');
+            const termsTitle = document.getElementById('termsTitle');
+            const termsContent = document.getElementById('termsContent');
+            const termsConfirm = document.getElementById('termsConfirm');
+            termsTitle.textContent = data.title;
+            termsContent.innerHTML = marked.parse(data.content);
+            termsModal.classList.add('show');
+            termsConfirm.onclick = () => {
+                localStorage.setItem('notificationNumber', String(data.number));
+                location.reload();
+            };
+        }
+
+        const sidebarList = $('#memoList');
+        const memoDetail = $('#memoDetail');
+        const memoTitle = $('#memoTitle');
+        const createDateElem = $('#createDate');
+        const updateDateElem = $('#updateDate');
+        const addBtn = $('#addBtn');
+        const addFolderBtn = $('#addFolderBtn');
+        if (addFolderBtn) {
+            addFolderBtn.addEventListener('click', () => {
+                const name = prompt('폴더 이름을 입력하세요');
+                if (!name) return;
+                const f = {id: crypto.randomUUID(), name: name.trim(), codes: []};
+                folders.push(f);
+                saveFolders();
+                renderFolders();
+            });
+        }
+        const codeInput = $('#codeInput');
+        // Restrict to uppercase letters & digits, max 8 chars
+        codeInput.addEventListener('input', () => {
+            codeInput.value = codeInput.value
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .substring(0, 8);
+        });
+        const noMemoElem = $('#noMemo');
+        const settingsBtn = $('#settingsBtn');
+        const settingsModal = $('#settingsModal');
+        const settingsClose = settingsModal ? $('#settingsClose') : null;
+        const autoSaveEnable = settingsModal ? $('#autoSaveEnable') : null;
+        const autoSaveInput = settingsModal ? $('#autoSaveIntervalInput') : null;
+        const themeSelect = settingsModal ? $('#themeSelect') : null;
+        const resetListBtn = settingsModal ? $('#resetListBtn') : null;
+
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                const savedInterval = parseInt(localStorage.getItem('autoSaveInterval'));
+                if (!isNaN(savedInterval)) {
+                    autoSaveEnable.checked = true;
+                    autoSaveInput.disabled = false;
+                    autoSaveInput.value = savedInterval;
+                } else {
+                    autoSaveEnable.checked = false;
+                    autoSaveInput.disabled = true;
+                    autoSaveInput.value = '';
+                }
+                themeSelect.value = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                settingsModal.classList.add('show');
+                const isLinked = !!connectClientResponseData;
+                $('#clientStatus').textContent = isLinked
+                    ? `연동중: ${connectClientResponseData.code}`
+                    : '미연동';
+                const btn = $('#clientIntegrationBtn');
+                btn.textContent = isLinked ? '연결해제' : '연결';
+                btn.onclick = () => {
+                    if (connectClientResponseData) {
+                        localStorage.removeItem(connectCodeKey);
+                        connectClientResponseData = null;
+                        const statusElem = $('#clientStatus');
+                        statusElem.textContent = '미연동';
+                        btn.textContent = '연결';
+                    } else {
+                        settingsModal.classList.remove('show');
+                        openClientIntegrationDialog();
+                    }
+                };
+            });
+            settingsClose.addEventListener('click', () => settingsModal.classList.remove('show'));
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) settingsModal.classList.remove('show');
+            });
+
+            autoSaveEnable.addEventListener('change', e => {
+                if (e.target.checked) {
+                    autoSaveInput.disabled = false;
+                    const val = 60;
+                    autoSaveInput.value = val;
+                    localStorage.setItem('autoSaveInterval', val);
+                    setupAutoSave();
+                } else {
+                    autoSaveInput.disabled = true;
+                    localStorage.removeItem('autoSaveInterval');
+                    if (autoSaveTimerId !== null) {
+                        clearInterval(autoSaveTimerId);
+                        autoSaveTimerId = null;
+                    }
+                }
+            });
+
+            autoSaveInput.addEventListener('change', e => {
+                let v = parseInt(e.target.value);
+                if (isNaN(v) || v < 10) v = 10;
+                if (v > 240) v = 240;
+                e.target.value = v;
+                if (autoSaveEnable.checked) {
+                    localStorage.setItem('autoSaveInterval', v);
+                    setupAutoSave();
+                }
+            });
+
+            themeSelect.addEventListener('change', e => {
+                const val = e.target.value;
+                document.body.classList.toggle('dark-mode', val === 'dark');
+                document.body.classList.toggle('light-mode', val === 'light');
+                localStorage.setItem('theme', val === 'dark' ? 'dark-mode' : 'light-mode');
+                updateThemeIcon();
+                const currentContent = memoEditor.getMarkdown();
+                memoEditor.destroy();
+                memoEditor = initEditor(currentContent);
+                applyEditorThemeClass();
+            });
+
+            resetListBtn.addEventListener('click', () => {
+                if (confirm('정말 초기화 하시겠습니까?')) {
+                    localStorage.removeItem(noteCodesKey);
+                    location.reload();
+                }
+            });
+        }
+
+        function openClientIntegrationDialog() {
+            const m = document.getElementById('clientIntegrationModal');
+            m.classList.add('show');
+            ['createClientBtn', 'connectClientBtn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+            ['clientConnectForm', 'clientConnectStatus', 'clientConnectExecuteBtn', 'clientDialogBackBtn'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        }
+
+        $('#clientDialogClose').addEventListener('click', () => {
+            $('#clientIntegrationModal').classList.remove('show');
+        });
+
+        $('#createClientBtn').addEventListener('click', () => {
+            fetch('/connect/client?' + codes.map(c => 'noteCodes=' + encodeURIComponent(c)).join('&'), {method: 'POST'})
+                .then(res => res.json())
+                .then(data => {
+                    localStorage.setItem(connectCodeKey, data.code);
+                    connectClientResponseData = data;
+                    const status = $('#clientConnectStatus');
+                    status.textContent = '생성 완료되었습니다';
+                    status.classList.remove('hidden');
+                    $('#clientDialogBackBtn').classList.remove('hidden');
+                    ['createClientBtn', 'connectClientBtn'].forEach(id => $('#' + id).classList.add('hidden'));
+                });
+        });
+
+        $('#connectClientBtn').addEventListener('click', () => {
+            $('#clientConnectForm').classList.remove('hidden');
+            ['createClientBtn', 'connectClientBtn'].forEach(id => $('#' + id).classList.add('hidden'));
+            $('#clientDialogBackBtn').classList.remove('hidden');
+        });
+
+        $('#clientDialogBackBtn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        $('#clientCodeConfirmBtn').addEventListener('click', () => {
+            const input = $('#clientCodeInput').value.trim();
+            const statusElem = $('#clientConnectStatus');
+            statusElem.classList.add('hidden');
+            fetch('/connect/client', {headers: {'Connect-Code': input}})
+                .then(res => res.json().catch(() => null))
+                .then(data => {
+                    if (!data) {
+                        statusElem.textContent = '존재하지 않는 코드입니다';
+                        statusElem.classList.remove('hidden');
+                        return;
+                    }
+                    connectClientResponseData = data;
+                    statusElem.textContent = '확인되었습니다\n아래 연결 버튼을 누르면 기존 등록한 메모를 사라집니다';
+                    statusElem.classList.remove('hidden');
+                    $('#clientConnectExecuteBtn').classList.remove('hidden');
+                    $('#clientCodeConfirmBtn').disabled = true;
+                })
+                .catch(() => {
+                    statusElem.textContent = '존재하지 않는 코드입니다';
+                    statusElem.classList.remove('hidden');
+                });
+        });
+
+        $('#clientConnectExecuteBtn').addEventListener('click', () => {
+            const data = connectClientResponseData;
+            localStorage.setItem(connectCodeKey, data.code);
+            noteCodeObjs = data.noteCodes.map(c => ({code: c}));
+            localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+            location.reload();
+        });
+
+        codeInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addBtn.click();
+            }
+        });
+
+        let codes = noteCodeObjs.map(o => o.code);
+        let memos = [];
+        let autoSaveTimerId = null;
+
+        if (codes.length === 0) {
+            memoDetail.classList.add('hidden');
+            noMemoElem.classList.remove('hidden');
+        }
+
+        function saveFolders() {
+            localStorage.setItem(foldersKey, JSON.stringify(folders));
+        }
+
+        /* ---------- 폴더 삭제 ---------- */
+        function deleteFolder(id) {
+            const idx = folders.findIndex(f => f.id === id);
+            if (idx === -1) return;
+
+            if (!confirm('폴더를 삭제할까요?')) return;
+
+            // 1) 메모들을 루트로 이동
+            noteCodeObjs.forEach(o => {
+                if (o.folderId === id) o.folderId = null;
+            });
+            localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+
+            // 2) 폴더 배열에서 제거하고 저장
+            folders.splice(idx, 1);
+            saveFolders();
+
+            // 3) 루트(전체)로 전환
+            activeFolderId = null;
+            localStorage.removeItem(activeFolderKey);
+
+            // 4) 화면 갱신
+            renderFolders();
+            renderList();
+        }
+
+        /* ---------- 메모를 선택 폴더에 배치 ---------- */
+        function moveNoteToFolder(noteCode, folderId) {
+            // 모든 폴더에서 코드 제거
+            folders.forEach(f => {
+                f.codes = (f.codes || []).filter(c => c !== noteCode);
+            });
+
+            // 선택 폴더에 추가
+            if (folderId) {
+                const target = folders.find(f => f.id === folderId);
+                if (target) {
+                    if (!target.codes) target.codes = [];
+                    if (!target.codes.includes(noteCode)) {
+                        target.codes.push(noteCode);
+                    }
+                }
+            }
+
+            saveFolders();
+            renderFolders();
+            renderList();
+        }
+
+        /* ---------- 폴더 선택 모달 ---------- */
+        function showMoveToFolderModal(noteCode) {
+            const modal   = document.getElementById('moveFolderModal');
+            const select  = document.getElementById('moveFolderSelect');
+
+            // 드롭다운 갱신
+            select.innerHTML = '';
+            folders.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.id;
+                opt.textContent = f.name;
+                select.appendChild(opt);
+            });
+            const addOpt = document.createElement('option');
+            addOpt.value = 'add';
+            addOpt.textContent = '➕  폴더 추가하기';
+            select.appendChild(addOpt);
+
+            modal.classList.add('show');
+
+            document.getElementById('moveFolderCancel').onclick = () => modal.classList.remove('show');
+            document.getElementById('moveFolderConfirm').onclick = () => {
+                const val = select.value;
+                if (val === 'add') {
+                    const name = prompt('새 폴더 이름을 입력하세요');
+                    if (!name) return;
+                    const newFolder = {id: crypto.randomUUID(), name: name.trim(), codes: []};
+                    folders.push(newFolder);
+                    saveFolders();
+                    moveNoteToFolder(noteCode, newFolder.id);
+                } else {
+                    moveNoteToFolder(noteCode, val);
+                }
+                modal.classList.remove('show');
+            };
+
+            // 모달 배경 클릭 시 닫기
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('show');
+            });
+        }
+
+        function renderFolders() {
+            const list = document.getElementById('folderList');
+            if (!list) return;
+            list.innerHTML = '';
+
+            // 전체(root)
+            const root = document.createElement('div');
+            root.className = 'folder-item' + (activeFolderId === null ? ' active' : '');
+            root.textContent = '전체';
+            root.onclick = () => {
+                activeFolderId = null;
+                localStorage.removeItem(activeFolderKey);
+                renderFolders();
+                renderList();
+            };
+            list.appendChild(root);
+
+            folders.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'folder-item' + (f.id === activeFolderId ? ' active' : '');
+                item.innerHTML = `
+            <span>📁 ${f.name}</span>
+            <span style="display:flex;gap:4px;">
+                <span>${(f.codes || []).length}</span>
+                <span class="folder-delete" title="삭제" data-id="${f.id}">🗑️</span>
+            </span>`;
+
+                // 클릭 → 폴더 선택
+                item.addEventListener('click', () => {
+                    activeFolderId = f.id;
+                    localStorage.setItem(activeFolderKey, activeFolderId);
+                    renderFolders();
+                    renderList();
+                });
+
+                // 휴지통 클릭 → 삭제
+                item.querySelector('.folder-delete')
+                    .addEventListener('click', (e) => {
+                        e.stopPropagation();          // 폴더 선택 이벤트 막기
+                        deleteFolder(f.id);
+                    });
+
+                list.appendChild(item);
+            });
+        }
+
+        function setupAutoSave() {
+            if (autoSaveTimerId !== null) {
+                clearInterval(autoSaveTimerId);
+            }
+            const interval = parseInt(localStorage.getItem('autoSaveInterval'));
+            if (!isNaN(interval)) {
+                autoSaveTimerId = setInterval(() => {
+                    if (activeCode) {
+                        updateContent();
+                    }
+                }, interval * 1000);
+            }
+        }
+
+        setupAutoSave();
+
+        function fetchMemos() {
+            if (codes.length === 0) {
+                sidebarList.innerHTML = '';
+                memoDetail.classList.add('hidden');
+                noMemoElem.classList.remove('hidden');
+                return;
+            }
+            fetch('/note/list?' + codes.map(c => 'codes=' + encodeURIComponent(c)).join('&'))
+                .then(res => res.json())
+                .then(data => {
+                    const returnedCodes = data.map(m => m.code);
+                    const invalidCodes = codes.filter(c => !returnedCodes.includes(c));
+                    if (invalidCodes.length) {
+                        noteCodeObjs = noteCodeObjs.filter(o => returnedCodes.includes(o.code));
+                        localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+                        codes = noteCodeObjs.map(o => o.code);
+                    }
+                    const fetched = data;
+                    memos = codes.map(c => fetched.find(m => m.code === c)).filter(m => m);
+                    renderFolders();
+                    renderList();
+                    if (memos.length === 0) {
+                        memoDetail.classList.add('hidden');
+                        noMemoElem.classList.remove('hidden');
+                        return;
+                    }
+                    noMemoElem.classList.add('hidden');
+                    if (!activeCode || !memos.find(m => m.code === activeCode)) {
+                        activeCode = memos[0].code;
+                    }
+                    localStorage.setItem(activeCodeKey, activeCode);
+                    selectMemo(activeCode);
+                });
+        }
+
+        function renderList() {
+            sidebarList.innerHTML = '';
+            const currentFolderCodes = activeFolderId === null
+                ? noteCodeObjs.map(o => o.code)                                    // 전체 폴더
+                : (folders.find(f => f.id === activeFolderId)?.codes || []);      // 선택 폴더
+            memos.filter(m => currentFolderCodes.includes(m.code)).forEach(m => {
+                const li = document.createElement('div');
+                li.className = 'memo-item';
+                li.setAttribute('draggable', true);
+
+                const preview = m.content ? m.content.substring(0, 100) : '';
+                const createDate = new Date(m.createDate).toLocaleDateString();
+                const updateDate = new Date(m.updateDate).toLocaleDateString();
+
+                li.innerHTML = `
+                    <div class="memo-title">${m.title || '(제목없음)'}</div>
+                    <div class="memo-preview">${preview}</div>
+                    <div class="memo-meta">
+                        <span>수정: ${updateDate}</span>
+                        <span>생성: ${createDate}</span>
+                    </div>
+                    <button class="note-options-btn" title="메모 옵션">⋮</button>
+                    <div class="note-options-menu hidden" data-code="${m.code}">
+                        <div class="note-option-item invite-option">🔗 초대</div>
+                        <div class="note-option-item move-option">📂 폴더에 넣기</div>
+                        <div class="note-option-item delete-option">🗑️ 삭제</div>
+                    </div>
+                `;
+
+                if (m.code === activeCode) {
+                    li.classList.add('active');
+                }
+
+                // 메모 항목 클릭 시 선택 처리
+                li.addEventListener('click', (e) => {
+                    // 옵션 버튼이나 메뉴를 클릭한 경우 이벤트 전파 방지
+                    if (e.target.closest('.note-options-btn') || e.target.closest('.note-options-menu')) {
+                        return;
+                    }
+                    selectMemo(m.code);
+                });
+
+                // 옵션 버튼 이벤트 처리
+                const optionsBtn = li.querySelector('.note-options-btn');
+                const optionsMenu = li.querySelector('.note-options-menu');
+
+                optionsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // 현재 열린 다른 메뉴 닫기
+                    document.querySelectorAll('.note-options-menu:not(.hidden)').forEach(menu => {
+                        if (menu !== optionsMenu) {
+                            menu.classList.add('hidden');
+                        }
+                    });
+                    // 현재 메뉴 토글
+                    optionsMenu.classList.toggle('hidden');
+                    currentMenuCode = m.code;
+                });
+
+                // 초대 옵션 클릭 이벤트
+                const inviteOption = li.querySelector('.invite-option');
+                inviteOption.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    optionsMenu.classList.add('hidden');
+                    showInviteModal(m.code);
+                });
+
+                // 폴더에 넣기 클릭 이벤트
+                const moveOption = li.querySelector('.move-option');
+                moveOption.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    optionsMenu.classList.add('hidden');
+                    showMoveToFolderModal(m.code);
+                });
+
+                // 삭제 옵션 클릭 이벤트
+                const deleteOption = li.querySelector('.delete-option');
+                deleteOption.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    optionsMenu.classList.add('hidden');
+                    deleteNote(m.code);
+                });
+
+                // Drag and drop functionality
+                li.addEventListener('dragstart', function (e) {
+                    draggedCode = m.code;
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                li.addEventListener('dragenter', function (e) {
+                    e.preventDefault();
+                    if (draggedCode !== m.code) {
+                        li.style.backgroundColor = 'var(--surface-secondary)';
+                    }
+                });
+
+                li.addEventListener('dragleave', function (e) {
+                    li.style.backgroundColor = '';
+                });
+
+                li.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                });
+
+                li.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    li.style.backgroundColor = '';
+                    if (draggedCode && draggedCode !== m.code) {
+                        reorderMemos(draggedCode, m.code);
+                    }
+                    draggedCode = null;
+                });
+
+                sidebarList.appendChild(li);
+            });
+        }
+
+        function reorderMemos(draggedCode, targetCode) {
+            const draggedIndex = noteCodeObjs.findIndex(o => o.code === draggedCode);
+            const targetIndex = noteCodeObjs.findIndex(o => o.code === targetCode);
+
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                const draggedItem = noteCodeObjs.splice(draggedIndex, 1)[0];
+                noteCodeObjs.splice(targetIndex, 0, draggedItem);
+                localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+                codes = noteCodeObjs.map(o => o.code);
+                fetchMemos();
+            }
+        }
+
+        function selectMemo(code) {
+            activeCode = code;
+            localStorage.setItem(activeCodeKey, activeCode);
+            const memo = memos.find(m => m.code === code);
+            if (memo) {
+                memoDetail.classList.remove('hidden');
+                noMemoElem.classList.add('hidden');
+                memoTitle.value = memo.title || '';
+                memoEditor.setMarkdown(memo.content || '');
+                createDateElem.textContent = new Date(memo.createDate).toLocaleString();
+                updateDateElem.textContent = new Date(memo.updateDate).toLocaleString();
+                renderList();
+            }
+        }
+
+        // 제목만 저장
+        function updateTitle() {
+            if (!activeCode) return;
+            const title = memoTitle.value.trim();
+
+            fetch(`/note/${activeCode}/title`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const memo = memos.find(m => m.code === activeCode);
+                    if (memo) {
+                        memo.title = title;
+                        const parsed = toDate(data.updateDate ?? Date.now());
+                        memo.updateDate = parsed.getTime();
+                        updateDateElem.textContent = parsed.toLocaleString();
+                        renderList();
+                    }
+                    showNotification('제목이 저장되었습니다', 'success');
+                })
+                .catch((e) => showNotification('제목 저장에 실패했습니다', 'error'));
+        }
+
+        // 내용만 저장
+        function updateContent() {
+            if (!activeCode) return;
+            const content = memoEditor.getMarkdown();
+
+            fetch(`/note/${activeCode}/content`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const memo = memos.find(m => m.code === activeCode);
+                    if (memo) {
+                        memo.content = content;
+                        const parsed = toDate(data.updateDate ?? Date.now());
+                        memo.updateDate = parsed.getTime();
+                        updateDateElem.textContent = parsed.toLocaleString();
+                        renderList();
+                    }
+                    showNotification('내용이 저장되었습니다', 'success');
+                })
+                .catch(() => showNotification('내용 저장에 실패했습니다', 'error'));
+        }
+
+        function generateCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let out = '';
+            for (let i = 0; i < 8; i++) {
+                out += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return out;
+        }
+
+        addBtn.addEventListener('click', () => {
+            let code = codeInput.value.trim().toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .substring(0, 8);
+
+            // If no code entered, generate one until it is unique
+            if (!code) {
+                do {
+                    code = generateCode();
+                } while (codes.includes(code));
+            } else if (codes.includes(code)) {
+                showNotification('이미 존재하는 코드입니다', 'error');
+                return;
+            }
+
+            fetch(`/note/${code}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({clientId: clientId})
+            })
+                .then(res => res.json())
+                .then(() => {
+                    const copyBtn = $('#copyCodeBtn');
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span>✓</span>';
+                    copyBtn.style.color = 'var(--success)';
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.style.color = '';
+                    }, 2000);
+
+                    noteCodeObjs.unshift({code}); // 새 메모를 목록 맨 앞에 배치
+                    localStorage.setItem(noteCodesKey, JSON.stringify(noteCodeObjs));
+                    codes = noteCodeObjs.map(o => o.code);
+                    activeCode = code;
+                    localStorage.setItem(activeCodeKey, activeCode);
+                    if (activeFolderId) {
+                        const folderObj = folders.find(f => f.id === activeFolderId);
+                        if (folderObj && !folderObj.codes.includes(code)) {
+                            folderObj.codes.push(code);
+                            saveFolders();
+                        }
+                    }
+                    codeInput.value = '';
+                    fetchMemos();
+                    showNotification('메모가 추가되었습니다', 'success');
+                })
+                .catch(() => {
+                    showNotification('메모 추가에 실패했습니다', 'error');
+                });
+        });
+
+        // Share functionality
+        const shareBtn = $('#shareBtn');
+        const shareModal = $('#shareModal');
+        const shareClose = $('#shareClose');
+
+        shareBtn.addEventListener('click', () => {
+            shareModal.classList.add('show');
+            // 초기 상태로 설정
+            $('#shareStageSelect').classList.remove('hidden');
+            $('#shareStageReceive').classList.add('hidden');
+            $('#shareStageCreate').classList.add('hidden');
+            $('#shareResultWrap').classList.add('hidden');
+        });
+
+        shareClose.addEventListener('click', () => {
+            shareModal.classList.remove('show');
+        });
+
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal) {
+                shareModal.classList.remove('show');
+            }
+        });
+
+        // 공유받기 버튼 클릭
+        $('#receiveBtn').addEventListener('click', () => {
+            $('#shareStageSelect').classList.add('hidden');
+            $('#shareStageReceive').classList.remove('hidden');
+            $('#shareCodeInput').value = '';
+            $('#shareCodeInput').focus();
+        });
+
+        // 공유하기 버튼 클릭
+        $('#createBtn').addEventListener('click', () => {
+            $('#shareStageSelect').classList.add('hidden');
+            $('#shareStageCreate').classList.remove('hidden');
+            $('#linkInputWrap').classList.add('hidden');
+            $('#fileInputWrap').classList.add('hidden');
+            $('#shareSubmitBtn').disabled = true;
+        });
+
+        // 링크 모드 버튼 클릭
+        $('#modeLinkBtn').addEventListener('click', () => {
+            $('#modeLinkBtn').classList.add('btn-primary');
+            $('#modeLinkBtn').classList.remove('btn-secondary');
+            $('#modeFileBtn').classList.add('btn-secondary');
+            $('#modeFileBtn').classList.remove('btn-primary');
+            $('#linkInputWrap').classList.remove('hidden');
+            $('#fileInputWrap').classList.add('hidden');
+            $('#shareSubmitBtn').disabled = !$('#linkInput').value.trim();
+        });
+
+        // 파일 모드 버튼 클릭
+        $('#modeFileBtn').addEventListener('click', () => {
+            $('#modeFileBtn').classList.add('btn-primary');
+            $('#modeFileBtn').classList.remove('btn-secondary');
+            $('#modeLinkBtn').classList.add('btn-secondary');
+            $('#modeLinkBtn').classList.remove('btn-primary');
+            $('#fileInputWrap').classList.remove('hidden');
+            $('#linkInputWrap').classList.add('hidden');
+            $('#shareSubmitBtn').disabled = !$('#fileInput').files.length;
+        });
+
+        // 파일 선택 영역 클릭 처리
+        const fileDropArea = $('#fileDropText').parentElement;
+        fileDropArea.addEventListener('click', () => {
+            $('#fileInput').click();
+        });
+
+        // 파일 드래그 & 드롭 처리
+        fileDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDropArea.style.borderColor = 'var(--accent-primary)';
+        });
+
+        fileDropArea.addEventListener('dragleave', () => {
+            fileDropArea.style.borderColor = 'var(--border-primary)';
+        });
+
+        fileDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileDropArea.style.borderColor = 'var(--border-primary)';
+            if (e.dataTransfer.files.length) {
+                $('#fileInput').files = e.dataTransfer.files;
+                $('#fileDropText').textContent = `선택된 파일: ${e.dataTransfer.files[0].name}`;
+                $('#shareSubmitBtn').disabled = false;
+            }
+        });
+
+        // 파일 선택 처리
+        $('#fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                $('#fileDropText').textContent = `선택된 파일: ${e.target.files[0].name}`;
+                $('#shareSubmitBtn').disabled = false;
+            } else {
+                $('#fileDropText').textContent = '파일을 드래그하거나 클릭하여 선택하세요';
+                $('#shareSubmitBtn').disabled = true;
+            }
+        });
+
+        // 링크 입력 처리
+        $('#linkInput').addEventListener('input', (e) => {
+            $('#shareSubmitBtn').disabled = !e.target.value.trim();
+        });
+
+        // 공유코드로 페이지 접근 처리
+        $('#shareCodeInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#shareCodeConfirmBtn').click();
+            }
+        });
+
+        // 공유코드 확인 버튼 클릭
+        $('#shareCodeConfirmBtn').addEventListener('click', () => {
+            const code = $('#shareCodeInput').value.trim();
+            if (!code) {
+                showNotification('공유 코드를 입력해주세요', 'error');
+                return;
+            }
+
+            // 링크 처리를 위해 서버로 요청
+            window.location.href = `/page/share/${code}`;
+        });
+
+        // 공유하기 버튼 클릭
+        $('#shareSubmitBtn').addEventListener('click', () => {
+            const remainingCnt = parseInt($('#remainingInput').value) || 1;
+            if (remainingCnt < 1 || remainingCnt > 99) {
+                showNotification('공유 가능 횟수는 1~99 사이 값이어야 합니다', 'error');
+                return;
+            }
+
+            // 링크 모드인 경우
+            if ($('#linkInputWrap').classList.contains('hidden') === false) {
+                const link = $('#linkInput').value.trim();
+                if (!link) {
+                    showNotification('링크를 입력해주세요', 'error');
+                    return;
+                }
+
+                fetch('/share/link', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({link, remainingCnt})
+                })
+                    .then(res => res.json())
+                    .then(data => displayShareResult(data))
+                    .catch(() => showNotification('공유 생성에 실패했습니다', 'error'));
+            }
+            // 파일 모드인 경우
+            else {
+                const fileInput = $('#fileInput');
+                if (!fileInput.files.length) {
+                    showNotification('파일을 선택해주세요', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('remainingCnt', remainingCnt);
+
+                fetch('/share/file', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => displayShareResult(data))
+                    .catch(() => showNotification('공유 생성에 실패했습니다', 'error'));
+            }
+        });
+
+        // 공유 결과 표시 함수
+        function displayShareResult(data) {
+            $('#shareResultWrap').classList.remove('hidden');
+            $('#shareResultCode').value = data.code;
+            $('#shareCreateDate').textContent = new Date(data.createDate).toLocaleString();
+            $('#shareExpireDate').textContent = new Date(data.expireDate).toLocaleString();
+            $('#shareRemainingCnt').textContent = data.remainingCnt;
+
+            // 복사 버튼 설정
+            $('#copyCodeBtn').addEventListener('click', () => {
+                const codeInput = $('#shareResultCode');
+                codeInput.select();
+                document.execCommand('copy');
+                showNotification('코드가 복사되었습니다', 'success');
+            });
+        }
+
+        fetchMemos();
+        renderFolders();
+        renderList();
+    });
+</script>
+</body>
+</html>
